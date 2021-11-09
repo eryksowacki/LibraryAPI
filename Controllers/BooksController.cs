@@ -75,13 +75,14 @@ namespace bibliotekaAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Book>> PostBook(Book book)
         {
+            /*if(){
+
+            }*/
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
 
-           //var OneOfBooks = CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
            return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
 
-            // return RedirectToAction("GetAll", "LibrariesController", new { OneOfBooks });
         }
 
         // DELETE: api/Books/5
