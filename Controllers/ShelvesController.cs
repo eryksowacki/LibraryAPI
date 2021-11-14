@@ -79,9 +79,15 @@ namespace bibliotekaAPI.Controllers
         {
             _context.Shelves.Add(shelf);
             await _context.SaveChangesAsync();
+            string firstError = "Nie można utworzyć półki z numerem 0 lub większym niż 3.";
+            int zmienna = shelf.ShelfNumber;
+
+            if (zmienna == 0 || zmienna > 3)
+            {
+                return BadRequest(firstError);
+            }
 
             return CreatedAtAction(nameof(GetShelf), new { id = shelf.Id }, shelf);
-            //return RedirectToAction("GetAll", "LibrariesController", (CreatedAtAction(nameof(GetShelf), new { id = shelf.Id }, shelf)));
         }
 
         // DELETE: api/Shelves/5

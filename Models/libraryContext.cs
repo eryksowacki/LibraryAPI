@@ -11,6 +11,5 @@ namespace bibliotekaAPI.Models
         }
         public DbSet<bibliotekaAPI.Models.Book> Books { get; set; } 
         public DbSet<bibliotekaAPI.Models.Shelf> Shelves { get; set; }
-        public DbSet<bibliotekaAPI.Models.Library> Library { get; set; }
     }
 }
