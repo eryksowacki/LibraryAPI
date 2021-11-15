@@ -14,6 +14,7 @@ namespace bibliotekaAPI.Controllers
     public class BooksController : ControllerBase
     {
         private readonly libraryContext _context;
+        private readonly long bookCounter;
 
         public BooksController(libraryContext context)
         {
@@ -44,7 +45,7 @@ namespace bibliotekaAPI.Controllers
         // PUT: api/Books/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBook(long id, Book book)
-        { 
+        {
             if (id != book.Id)
             {
                 return BadRequest();
@@ -76,26 +77,30 @@ namespace bibliotekaAPI.Controllers
         public async Task<ActionResult<Book>> PostBook(Book book)
         {
             string firstError = "W bibliotece znajdują się tylko półki o numerach 1, 2 i 3.";
-            string secondError = "Nie można utworzyć książki na tej półce - brak miejsca.";
+            //string secondError = "Nie można utworzyć książki na tej półce - brak miejsca.";
             int zmienna = book.ShelfNumber;
+
+
 
             if (zmienna == 0 || zmienna > 3)
             {
                 return BadRequest(firstError);
             }
 
-           /* long i = book.Id;
+            /*long i = 1;
 
-                if (i > 3)
-                {
-                    return BadRequest(secondError);
-                }
+            if (i > 3)
+            {
+                return BadRequest(secondError);
+            }
 
-                if ((zmienna == 1 || zmienna == 2 || zmienna == 3) && i < 4 && i > 0)
-                {*/
-                    _context.Books.Add(book);
-                    await _context.SaveChangesAsync();
-               // }
+            if ((zmienna == 1 || zmienna == 2 || zmienna == 3) && i < 4)
+            {
+            }*/
+                _context.Books.Add(book);
+                await _context.SaveChangesAsync();
+            
+
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }
 
