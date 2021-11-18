@@ -1,7 +1,17 @@
 using System;
-
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using bibliotekaAPI.Models;
-    public class bookCounter
+public static class bookCounter
 {
-    public static long i = 1;
+    public static int Ksiazki(int i)
+    { 
+        i++;
+        return i;
+    }
+  
 }

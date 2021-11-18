@@ -14,21 +14,18 @@ namespace bibliotekaAPI.Controllers
     public class BooksController : ControllerBase
     {
         private readonly libraryContext _context;
-        private readonly long bookCounter;
 
         public BooksController(libraryContext context)
         {
             _context = context;
         }
 
-        // GET: api/Books
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
             return await _context.Books.ToListAsync();
         }
 
-        // GET: api/Books/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Book>> GetBook(long id)
         {
@@ -42,7 +39,6 @@ namespace bibliotekaAPI.Controllers
             return book;
         }
 
-        // PUT: api/Books/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBook(long id, Book book)
         {
@@ -51,7 +47,14 @@ namespace bibliotekaAPI.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(book).State = EntityState.Modified;
+            var shelfNumber = book.ShelfNumber;
+            var ids = _context.Books.Select(b => b.Id);
+            int numberOfBooks = ids.Count();
+
+            if((shelfNumber == 1 || shelfNumber == 2 || shelfNumber == 3) && numberOfBooks > 2)
+            {
+                _context.Entry(book).State = EntityState.Modified;
+            }
 
             try
             {
@@ -72,43 +75,39 @@ namespace bibliotekaAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/Books
         [HttpPost]
-        public async Task<ActionResult<Book>> PostBook(Book book)
+        public async Task<ActionResult<Book>> PostBook(Book book)//, int shelfNumber, int numberOfBooks)
         {
-            string firstError = "W bibliotece znajdują się tylko półki o numerach 1, 2 i 3.";
-            //string secondError = "Nie można utworzyć książki na tej półce - brak miejsca.";
-            int zmienna = book.ShelfNumber;
+            //var shelfNumber = _context.Books.Select(b => b.ShelfNumber);
+            //int numberOfShelves = shelfNumber.Count();
+            var shelfNumber = book.ShelfNumber;
 
-
-
-            if (zmienna == 0 || zmienna > 3)
+            string firstError = "W bazie znajdują się tylko półki o numerach 1, 2 i 3";
+            string secondError = "Na tej półce nie ma już miejsca na kolejną książkę.";
+            var id = _context.Books.Select(b => b.Id);
+            int numberOfBooks = id.Count();
+           
+            if(shelfNumber < 1 && shelfNumber > 3)
             {
                 return BadRequest(firstError);
             }
-
-            /*long i = 1;
-
-            if (i > 3)
+            
+            if(numberOfBooks > 2)
             {
                 return BadRequest(secondError);
             }
 
-            if ((zmienna == 1 || zmienna == 2 || zmienna == 3) && i < 4)
-            {
-            }*/
-                _context.Books.Add(book);
-                await _context.SaveChangesAsync();
-            
+                    _context.Books.Add(book);
+                        await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }
 
-        // DELETE: api/Books/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(long id)
         {
             var book = await _context.Books.FindAsync(id);
+
             if (book == null)
             {
                 return NotFound();

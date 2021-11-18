@@ -19,17 +19,13 @@ namespace bibliotekaAPI.Controllers
         {
             _context = context;
         }
-        //public Book
 
-
-        // GET: api/Shelves
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Shelf>>> GetShelves()
         {
             return await _context.Shelves.ToListAsync();
         }
 
-        // GET: api/Shelves/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Shelf>> GetShelf(long id)
         {
@@ -43,7 +39,6 @@ namespace bibliotekaAPI.Controllers
             return shelf;
         }
 
-        // PUT: api/Shelves/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutShelf(long id, Shelf shelf)
         {
@@ -73,7 +68,6 @@ namespace bibliotekaAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/Shelves
         [HttpPost]
         public async Task<ActionResult<Shelf>> PostShelf(Shelf shelf)
         {
@@ -90,7 +84,6 @@ namespace bibliotekaAPI.Controllers
             return CreatedAtAction(nameof(GetShelf), new { id = shelf.Id }, shelf);
         }
 
-        // DELETE: api/Shelves/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteShelf(long id)
         {
