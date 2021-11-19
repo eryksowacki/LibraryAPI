@@ -13,9 +13,9 @@ namespace bibliotekaAPI.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly libraryContext _context;
+        private readonly LibraryContext _context;
 
-        public BooksController(libraryContext context)
+        public BooksController(LibraryContext context)
         {
             _context = context;
         }
@@ -47,15 +47,21 @@ namespace bibliotekaAPI.Controllers
                 return BadRequest();
             }
 
-            var shelfNumber = book.ShelfNumber;
-            var ids = _context.Books.Select(b => b.Id);
-            int numberOfBooks = ids.Count();
+            string error = "Na tej półce nie ma już miejsca";
+            var numberOfBooksOnShelf = _context.Books.Where(b => b.ShelfNumber == book.ShelfNumber).Count();
+            //var numberOfShelves = _context.Shelves.Select(s => s.Id).Count();
+            /*if(numberOfShelves < book.ShelfNumber){
+                return BadRequest(); 
+            }*/
+            var maxNumberOfBooks = _context.Shelves.Where(s => s.Id == book.ShelfNumber).Select(s => s.NumberOfBooks).First();
 
-            if((shelfNumber == 1 || shelfNumber == 2 || shelfNumber == 3) && numberOfBooks > 2)
+            if (numberOfBooksOnShelf > (maxNumberOfBooks - 1))
             {
-                _context.Entry(book).State = EntityState.Modified;
+                return BadRequest(error);
             }
 
+            _context.Entry(book).State = EntityState.Modified;
+            
             try
             {
                 await _context.SaveChangesAsync();
@@ -76,27 +82,21 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Book>> PostBook(Book book)//, int shelfNumber, int numberOfBooks)
+        public async Task<ActionResult<Book>> PostBook(Book book)
         {
-            //var shelfNumber = _context.Books.Select(b => b.ShelfNumber);
-            //int numberOfShelves = shelfNumber.Count();
-            var shelfNumber = book.ShelfNumber;
+            string error = "Na tej półce nie ma już miejsca";
+            var numberOfBooksOnShelf = _context.Books.Where(b => b.ShelfNumber == book.ShelfNumber).Count();
+            //var numberOfShelves = _context.Shelves.Select(s => s.Id).Count();//ilosc półek
+            var maxNumberOfBooks = _context.Shelves.Where(s => s.Id == book.ShelfNumber).Select(s => s.NumberOfBooks).First();
 
-            string firstError = "W bazie znajdują się tylko półki o numerach 1, 2 i 3";
-            string secondError = "Na tej półce nie ma już miejsca na kolejną książkę.";
-            var id = _context.Books.Select(b => b.Id);
-            int numberOfBooks = id.Count();
-           
-            if(shelfNumber < 1 && shelfNumber > 3)
+            if (numberOfBooksOnShelf > (maxNumberOfBooks-1))
             {
-                return BadRequest(firstError);
+                return BadRequest(error);
             }
+            /*if(numberOfShelves < book.ShelfNumber){
+                return BadRequest(); 
+            }*/ 
             
-            if(numberOfBooks > 2)
-            {
-                return BadRequest(secondError);
-            }
-
                     _context.Books.Add(book);
                         await _context.SaveChangesAsync();
 

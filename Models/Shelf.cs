@@ -6,7 +6,6 @@ namespace bibliotekaAPI.Models
     {
         public long Id { get; set; }
         public string Category { get; set; }
-        public int ShelfNumber { get; set; }
-        //public int NumberOfBooks { get; set; }
+        public int NumberOfBooks { get; set; }
     }
 }

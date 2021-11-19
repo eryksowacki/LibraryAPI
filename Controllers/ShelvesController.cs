@@ -13,9 +13,9 @@ namespace bibliotekaAPI.Controllers
     [ApiController]
     public class ShelvesController : ControllerBase
     {
-        private readonly libraryContext _context;
+        private readonly LibraryContext _context;
 
-        public ShelvesController(libraryContext context)
+        public ShelvesController(LibraryContext context)
         {
             _context = context;
         }
@@ -73,13 +73,6 @@ namespace bibliotekaAPI.Controllers
         {
             _context.Shelves.Add(shelf);
             await _context.SaveChangesAsync();
-            string firstError = "Nie można utworzyć półki z numerem 0 lub większym niż 3.";
-            int zmienna = shelf.ShelfNumber;
-
-            if (zmienna == 0 || zmienna > 3)
-            {
-                return BadRequest(firstError);
-            }
 
             return CreatedAtAction(nameof(GetShelf), new { id = shelf.Id }, shelf);
         }

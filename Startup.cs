@@ -24,28 +24,21 @@ namespace bibliotekaAPI
         }
 
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
+        
         public void ConfigureServices(IServiceCollection services)
         {
 
             services.AddControllers();
 
-            services.AddDbContext<libraryContext>(opt =>
+            services.AddDbContext<LibraryContext>(opt =>
             opt.UseInMemoryDatabase("BookList"));
-
-            services.AddDbContext<libraryContext>(opt =>
-            opt.UseInMemoryDatabase("ShelfList"));
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                //app.UseSwagger();
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "bibliotekaAPI v1"));
             }
 
             app.UseHttpsRedirection();
@@ -54,42 +47,7 @@ namespace bibliotekaAPI
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name:"getshelf",
-                    pattern: "{controller=Shelves}/{action=GetShelf}/{id?}");
-            });
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "putshelf",
-                    pattern: "{controller=Shelves}/{action=PutShelf}/{id?}");
-            }); 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "postshelf",
-                    pattern: "{controller=Shelves}/{action=PostShelf}/{id?}");
-            });
-            /*app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "getbooks",
-                    pattern: "{controller=Books}/{action=GetBook}/{id?}");
-            });
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "putbooks",
-                    pattern: "{controller=Books}/{action=PutBook}/{id?}");
-            });
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "postbooks",
-                    pattern: "{controller=Books}/{action=PostBook}/{id?}");
-            });*/
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
 }

@@ -3,9 +3,9 @@ using bibliotekaAPI.Models;
 
 namespace bibliotekaAPI.Models
 {
-    public class libraryContext : DbContext
+    public class LibraryContext : DbContext
     {
-        public libraryContext(DbContextOptions<libraryContext> options)
+        public LibraryContext(DbContextOptions<LibraryContext> options)
             : base(options)
         {
         }
