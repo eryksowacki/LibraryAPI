@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using bibliotekaAPI.Models;
+using System.Threading;
 
 namespace bibliotekaAPI.Controllers
 {
@@ -21,15 +22,15 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Shelf>>> GetShelves()
+        public  Task<List<Shelf>> GetShelves(CancellationToken token)
         {
-            return await _context.Shelves.ToListAsync();
+            return  _context.Shelves.ToListAsync(token);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Shelf>> GetShelf(long id)
+        public async Task<ActionResult<Shelf>> GetShelf(long id, CancellationToken token)
         {
-            var shelf = await _context.Shelves.FindAsync(id);
+            var shelf = await _context.Shelves.FindAsync(id, token);
 
             if (shelf == null)
             {
@@ -40,54 +41,58 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutShelf(long id, Shelf shelf)
+        public async Task<IActionResult> PutShelf(long id, Shelf shelf, CancellationToken token)
         {
             if (id != shelf.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(shelf).State = EntityState.Modified;
+            if (!ShelfExists(id))
+            {
+                return NotFound();
+            }
+            //zabezpieczenie przed zmiana ilosci ksiazek
+            string error = "Nie można zmienić ilości książek";
+            if (shelf.NumberOfBooks != _context.Shelves.Select(s => s.NumberOfBooks).FirstOrDefault())
+            {
+                return BadRequest(error);
+            }
 
+            _context.Entry(shelf).State = EntityState.Modified;
+            
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(token);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception)
             {
-                if (!ShelfExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(500);
             }
 
             return NoContent();
         }
 
         [HttpPost]
-        public async Task<ActionResult<Shelf>> PostShelf(Shelf shelf)
+        public async Task<ActionResult<Shelf>> PostShelf(Shelf shelf, CancellationToken token)
         {
             _context.Shelves.Add(shelf);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(token);
 
             return CreatedAtAction(nameof(GetShelf), new { id = shelf.Id }, shelf);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteShelf(long id)
+        public async Task<IActionResult> DeleteShelf(long id, CancellationToken token)
         {
-            var shelf = await _context.Shelves.FindAsync(id);
+            var shelf = await _context.Shelves.FindAsync(id, token);
             if (shelf == null)
             {
                 return NotFound();
             }
 
             _context.Shelves.Remove(shelf);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(token);
 
             return NoContent();
         }

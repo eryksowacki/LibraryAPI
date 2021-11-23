@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using bibliotekaAPI.Models;
+using System.Threading;
 
 namespace bibliotekaAPI.Controllers
 {
@@ -21,15 +22,15 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
+        public Task<List<Book>> GetBooks(CancellationToken token)
         {
-            return await _context.Books.ToListAsync();
+            return _context.Books.ToListAsync(token);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Book>> GetBook(long id)
+        public async Task<ActionResult<Book>> GetBook(long id, CancellationToken token)
         {
-            var book = await _context.Books.FindAsync(id);
+            var book = await _context.Books.FindAsync(id, token);
 
             if (book == null)
             {
@@ -40,73 +41,76 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBook(long id, Book book)
+        public async Task<IActionResult> PutBook(long id, Book book, CancellationToken token)
         {
             if (id != book.Id)
             {
                 return BadRequest();
             }
 
-            string error = "Na tej półce nie ma już miejsca";
-            var numberOfBooksOnShelf = _context.Books.Where(b => b.ShelfNumber == book.ShelfNumber).Count();
-            //var numberOfShelves = _context.Shelves.Select(s => s.Id).Count();
-            /*if(numberOfShelves < book.ShelfNumber){
-                return BadRequest(); 
-            }*/
-            var maxNumberOfBooks = _context.Shelves.Where(s => s.Id == book.ShelfNumber).Select(s => s.NumberOfBooks).First();
-
-            if (numberOfBooksOnShelf > (maxNumberOfBooks - 1))
+            if (!BookExists(id))
             {
-                return BadRequest(error);
+                return NotFound();
             }
+            //czy półka w ogóle istnieje?
+            if (!ShelfExists(id))
+            {
+                return NotFound();
+            }
+            //sprawdzenie czy zmienił się numer półki 
+            if (book.ShelfNumber != _context.Shelves.Select(s => s.Id).FirstOrDefault())
+            {
+                string error = "Na tej półce nie ma już miejsca";
+                var numberOfBooksOnShelf = _context.Books.Where(b => b.ShelfNumber == book.ShelfNumber).Count();
+                var maxNumberOfBooks = _context.Shelves.Where(s => s.Id == book.ShelfNumber).Select(s => s.NumberOfBooks).FirstOrDefault();
 
+                if (numberOfBooksOnShelf > (maxNumberOfBooks - 1))
+                {
+                    return BadRequest(error);
+                }
+            }
+            
             _context.Entry(book).State = EntityState.Modified;
             
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(token);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception)
             {
-                if (!BookExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(500);
             }
 
             return NoContent();
         }
 
         [HttpPost]
-        public async Task<ActionResult<Book>> PostBook(Book book)
+        public async Task<ActionResult<Book>> PostBook(Book book, CancellationToken token, long id)
         {
+            id = book.ShelfNumber;
+            //czy półka w ogóle istnieje?
+            if (!ShelfExists(id))
+            {
+                return NotFound();
+            }
             string error = "Na tej półce nie ma już miejsca";
             var numberOfBooksOnShelf = _context.Books.Where(b => b.ShelfNumber == book.ShelfNumber).Count();
-            //var numberOfShelves = _context.Shelves.Select(s => s.Id).Count();//ilosc półek
             var maxNumberOfBooks = _context.Shelves.Where(s => s.Id == book.ShelfNumber).Select(s => s.NumberOfBooks).First();
 
             if (numberOfBooksOnShelf > (maxNumberOfBooks-1))
             {
                 return BadRequest(error);
             }
-            /*if(numberOfShelves < book.ShelfNumber){
-                return BadRequest(); 
-            }*/ 
-            
                     _context.Books.Add(book);
-                        await _context.SaveChangesAsync();
+                        await _context.SaveChangesAsync(token);
 
             return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBook(long id)
+        public async Task<IActionResult> DeleteBook(long id, CancellationToken token)
         {
-            var book = await _context.Books.FindAsync(id);
+            var book = await _context.Books.FindAsync(id, token);
 
             if (book == null)
             {
@@ -114,7 +118,7 @@ namespace bibliotekaAPI.Controllers
             }
 
             _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(token);
 
             return NoContent();
         }
@@ -122,6 +126,10 @@ namespace bibliotekaAPI.Controllers
         private bool BookExists(long id)
         {
             return _context.Books.Any(e => e.Id == id);
+        }
+        private bool ShelfExists(long id)
+        {
+            return _context.Shelves.Any(e => e.Id == id);
         }
     }
 }
