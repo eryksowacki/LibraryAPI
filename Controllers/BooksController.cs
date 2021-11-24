@@ -28,9 +28,9 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Book>> GetBook(long id, CancellationToken token)
+        public async Task<ActionResult<Book>> GetBook(long id)
         {
-            var book = await _context.Books.FindAsync(id, token);
+            var book = await _context.Books.FindAsync(id);
 
             if (book == null)
             {
@@ -41,7 +41,7 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBook(long id, Book book, CancellationToken token)
+        public async Task<IActionResult> PutBook(long id, Book book)
         {
             if (id != book.Id)
             {
@@ -75,7 +75,7 @@ namespace bibliotekaAPI.Controllers
             
             try
             {
-                await _context.SaveChangesAsync(token);
+                await _context.SaveChangesAsync();
             }
             catch (Exception)
             {
@@ -109,9 +109,9 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBook(long id, CancellationToken token)
+        public async Task<IActionResult> DeleteBook(long id)
         {
-            var book = await _context.Books.FindAsync(id, token);
+            var book = await _context.Books.FindAsync(id);
 
             if (book == null)
             {
@@ -119,7 +119,7 @@ namespace bibliotekaAPI.Controllers
             }
 
             _context.Books.Remove(book);
-            await _context.SaveChangesAsync(token);
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }

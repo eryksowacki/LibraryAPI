@@ -28,9 +28,9 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Shelf>> GetShelf(long id, CancellationToken token)
+        public async Task<ActionResult<Shelf>> GetShelf(long id)
         {
-            var shelf = await _context.Shelves.FindAsync(id, token);
+            var shelf = await _context.Shelves.FindAsync(id);
 
             if (shelf == null)
             {
@@ -41,7 +41,7 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutShelf(long id, Shelf shelf, CancellationToken token)
+        public async Task<IActionResult> PutShelf(long id, Shelf shelf)
         {
             if (id != shelf.Id)
             {
@@ -64,7 +64,7 @@ namespace bibliotekaAPI.Controllers
             
             try
             {
-                await _context.SaveChangesAsync(token);
+                await _context.SaveChangesAsync();
             }
             catch (Exception)
             {
@@ -84,16 +84,16 @@ namespace bibliotekaAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteShelf(long id, CancellationToken token)
+        public async Task<IActionResult> DeleteShelf(long id)
         {
-            var shelf = await _context.Shelves.FindAsync(id, token);
+            var shelf = await _context.Shelves.FindAsync(id);
             if (shelf == null)
             {
                 return NotFound();
             }
 
             _context.Shelves.Remove(shelf);
-            await _context.SaveChangesAsync(token);
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
