@@ -52,13 +52,16 @@ namespace bibliotekaAPI.Controllers
             {
                 return NotFound();
             }
+
             //czy półka w ogóle istnieje?
-            if (!ShelfExists(id))
+            id = book.ShelfNumber;
+            if (!_context.Shelves.Any(s => s.Id == id))
             {
-                return NotFound();
+                string noShelves = "Półka o takim numerze nie istnieje w bazie danych.";
+                return BadRequest(noShelves);
             }
+
             //sprawdzenie czy zmienił się numer półki 
-            
             if (book.ShelfNumber != _context.Shelves.Select(s => s.Id).FirstOrDefault())
             {
                 string error = "Na tej półce nie ma już miejsca";
@@ -89,11 +92,14 @@ namespace bibliotekaAPI.Controllers
         public async Task<ActionResult<Book>> PostBook(Book book, CancellationToken token, long id)
         {
             id = book.ShelfNumber;
+
             //czy półka w ogóle istnieje?
-            if (!ShelfExists(id))
+            if (!_context.Shelves.Any(s => s.Id == id))
             {
-                return NotFound();
+                string noShelves = "Półka o takim numerze nie istnieje w bazie danych.";
+                return BadRequest(noShelves);
             }
+
             string error = "Na tej półce nie ma już miejsca";
             var numberOfBooksOnShelf = _context.Books.Where(b => b.ShelfNumber == book.ShelfNumber).Count();
             var maxNumberOfBooks = _context.Shelves.Where(s => s.Id == book.ShelfNumber).Select(s => s.NumberOfBooks).First();
@@ -127,10 +133,6 @@ namespace bibliotekaAPI.Controllers
         private bool BookExists(long id)
         {
             return _context.Books.Any(e => e.Id == id);
-        }
-        private bool ShelfExists(long id)
-        {
-            return _context.Shelves.Any(e => e.Id == id);
         }
     }
 }

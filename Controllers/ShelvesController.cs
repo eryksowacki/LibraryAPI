@@ -36,7 +36,6 @@ namespace bibliotekaAPI.Controllers
             {
                 return NotFound();
             }
-
             return shelf;
         }
 
