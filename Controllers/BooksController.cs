@@ -58,6 +58,7 @@ namespace bibliotekaAPI.Controllers
                 return NotFound();
             }
             //sprawdzenie czy zmienił się numer półki 
+            
             if (book.ShelfNumber != _context.Shelves.Select(s => s.Id).FirstOrDefault())
             {
                 string error = "Na tej półce nie ma już miejsca";

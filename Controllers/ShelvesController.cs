@@ -52,10 +52,11 @@ namespace bibliotekaAPI.Controllers
             {
                 return NotFound();
             }
+
             //zabezpieczenie przed zmiana ilosci ksiazek
-            string error = "Nie można zmienić ilości książek";
-            if (shelf.NumberOfBooks != _context.Shelves.Select(s => s.NumberOfBooks).FirstOrDefault())
+            if (shelf.NumberOfBooks < _context.Shelves.Select(s => s.NumberOfBooks).FirstOrDefault())
             {
+                string error = "Nie można zmienić ilości książek na mniejszą niż zadeklarowana";
                 return BadRequest(error);
             }
 
